@@ -5,7 +5,10 @@ from pysnmp.proto.api import v2c
 from time import time
 
 # SNMP table header
-headVars = [v2c.ObjectIdentifier((1, 3, 6))]
+# headVars = [v2c.ObjectIdentifier((1, 3, 6))]
+headVars = [v2c.ObjectIdentifier((1, 3, 6, 1, 2, 1, 55))]
+#.1.3.6.1.2.1.1.2.0
+#.1.3.6.1.2.1.62.2.2
 
 # Build PDU
 reqPDU = v2c.GetBulkRequestPDU()
@@ -97,9 +100,9 @@ transportDispatcher.registerTransport(
 )
 
 transportDispatcher.sendMessage(
-    encoder.encode(reqMsg), udp.domainName, ('demo.snmplabs.com', 161)
+    encoder.encode(reqMsg), udp.domainName, ('127.0.0.1', 161)
 )
-
+#demo.snmplabs.com
 transportDispatcher.jobStarted(1)
 
 # Dispatcher will finish as job#1 counter reaches zero
