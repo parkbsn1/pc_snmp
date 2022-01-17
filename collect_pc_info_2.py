@@ -1,4 +1,5 @@
 import psutil
+import ctypes
 import numpy as np
 #https://npd-58.tistory.com/27
 
@@ -11,7 +12,7 @@ def Get_CPU_INFO():
     print(f"CPU Logical cnt: {psutil.cpu_count(logical=True)}")
     cpu_logical_used_percent = np.array(psutil.cpu_percent(interval=0.5,percpu=True))
     print(f"CPU_Logical used percent: {cpu_logical_used_percent}")
-    print(f"CPU_Logical used percent(AVG): {np.mean(cpu_logical_used_percent)}")
+    print(f"CPU_Logical used percent(AVG): {psutil.cpu_percent()}")
 
     #return할 정보만 설정
 
@@ -80,6 +81,10 @@ def GET_Process_INFO():
     print(f"list 형식 출력({len(procs_list_1)})")
     print(procs_list_1)
 
+    # procs_list_2 = [proc.info for proc in psutil.process_iter(attrs=['pid', 'name', 'username', 'status', 'started'])]
+    # print(f"list 형식 출력2({len(procs_list_2)})")
+    # print(procs_list_2)
+
     procs_dict_1 = {p.pid: p.info for p in psutil.process_iter(attrs=['name', 'username'])}
     print(f"dict 형식 출력({len(procs_dict_1)})")
     print(procs_dict_1)
@@ -93,6 +98,26 @@ def GET_Process_INFO():
     print(unique_proc_name)
     # print(procs_name_dict_1.values())
 
+def GET_PC_UPTIME():
+    # getting the library in which GetTickCount64() resides
+    lib = ctypes.windll.kernel32
+
+    # calling the function and storing the return value
+    t = lib.GetTickCount64()
+
+    # since the time is in milliseconds i.e. 1000 * seconds
+    # therefore truncating the value
+    t = int(str(t)[:-3])
+
+    # extracting hours, minutes, seconds & days from t
+    # variable (which stores total time in seconds)
+    mins, sec = divmod(t, 60)
+    hour, mins = divmod(mins, 60)
+    days, hour = divmod(hour, 24)
+
+    # formatting the time in readable form
+    # (format = x days, HH:MM:SS)
+    print(f"{days} days, {hour:02}:{mins:02}:{sec:02}")
 
 def TEST_INFO():
     # @ Todo Process 정보
@@ -133,9 +158,30 @@ def TEST_INFO():
     for k,v in process_dict.items():
         print(k, v)
 
+def TEST_INFO_2():
+    # procs_list_2 = [proc.info for proc in psutil.process_iter(attrs=['pid', 'name', 'username', 'status', 'started'])]
+    # print(f"list 형식 출력2({len(procs_list_2)})")
+    # print(procs_list_2)
+
+    # procs_list_2 = [proc.info for proc in psutil.process_iter(attrs=['pid', 'name', 'username', 'status', 'started'])]
+    # print(procs_list_2)
+
+    print(f"type {psutil.process_iter()} | len: {psutil.process_iter()}")
+    for process in psutil.process_iter():
+        print(f"type {process} | len: {process}")
+        print(process)
+        break
+
 def main():
     print("Main Function")
-    GET_Process_INFO()
+    # GET_Process_INFO()
+    # GET_Network_INFO()
+    # GET_Mem_INFO()
+    # GET_DISK_INFO()
+    # Get_CPU_INFO()
+    # GET_PC_UPTIME()
+    # TEST_INFO()
+    TEST_INFO_2()
 
 if __name__ == "__main__":
     print("Start")
