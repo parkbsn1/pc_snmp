@@ -111,11 +111,9 @@ def GET_PC_UPTIME():
 
     # since the time is in milliseconds i.e. 1000 * seconds
     # therefore truncating the value
-    print(t)
     t = int(str(t)[:-3])
 
     # t = int(str(t))
-    print(t)
 
     # extracting hours, minutes, seconds & days from t
     # variable (which stores total time in seconds)
@@ -134,113 +132,15 @@ def GET_Battery_INFO():
     print(f"power_plugged: {battery.power_plugged}")
 
 def GET_BOOT_TIME():
-    psutil.boot_time()
-    print(psutil.boot_time())
+    b_time = datetime.datetime.fromtimestamp(psutil.boot_time())
+    n_time = datetime.datetime.now()
+    u_time = n_time - b_time
+    print(f"boot_time: {b_time} | now_time: {n_time} | up_time: {u_time}")
     boot_time_str = datetime.datetime.fromtimestamp(psutil.boot_time()).strftime("%Y-%m-%d %H:%M:%S")
     print(f"boot time: {boot_time_str}")
 
-def GET_BOOT_TIME2():
-    wmiob = wmi.WMI()
-    sdata = wmiob.Win32_PerfFormattedData_PerfOS_System()
-    uptime = sdata[-1].SystemUpTime
-    tnow = datetime.datetime.now()
-    utime = datetime.timedelta(seconds=int(uptime))
-    boot = tnow - utime
-
-    print(f"boot:{boot} | tnow:{tnow} | utime:{utime}")
-    bootime = "Boot time was around {}day {}:{}:{}".format(boot.day, boot.hour, boot.minute, boot.second)
-    print(bootime)
-
-    # returns the time in seconds since the epoch
-    last_reboot = psutil.boot_time()
-
-    # converting the date and time in readable format
-    print(datetime.datetime.fromtimestamp(last_reboot))
-
-def GET_BOOT_TIME3():
-    print(f"boot_time(): {psutil.boot_time()}")
 
 
-
-
-def secs2hours(secs):
-    mm, ss = divmod(secs, 60)
-    hh, mm = divmod(mm, 60)
-    return "%d:%02d:%02d" % (hh, mm, ss)
-
-def TEST_INFO():
-    # @ Todo Process 정보
-    print('-'*30)
-    print(f"Process info")
-    process_dict = {process.name:str(process.pid) for process in psutil.process_iter()}
-    for process in psutil.process_iter():
-        print(process)
-        pass
-        break
-
-    print('-'*30)
-    cnt = 0
-    process_dict ={}
-    for process in psutil.process_iter():
-        print(process)
-        tmp_dict = {}
-        tmp_dict['pid'] = str(process.pid)
-        tmp_dict['name'] = process.name()
-        tmp_dict['status'] = process.status()
-        tmp_dict['cpu_percent'] = process.cpu_percent()
-        tmp_dict['memory_percent'] = process.memory_percent()*100
-        tmp_dict['memory_info'] = process.memory_info
-        tmp_dict['memory_info_ex'] = process.memory_info_ex
-
-        # tmp_dict['memory_maps'] = process.memory_maps()
-        # tmp_dict['memory_full_info'] = process.memory_full_info()
-        process_dict[str(process.pid)] = tmp_dict
-
-        cnt += 1
-        if cnt > 5:
-            break
-    #     print(f"{cnt} {process.name()} \t {str(process.pid)}")
-    #     cnt +=1
-    #     #print(process.name() + "\t"+str(process.pid))
-
-    print('-'*30)
-    for k,v in process_dict.items():
-        print(k, v)
-
-def TEST_INFO_2():
-    # procs_list_2 = [proc.info for proc in psutil.process_iter(attrs=['pid', 'name', 'username', 'status', 'started'])]
-    # print(f"list 형식 출력2({len(procs_list_2)})")
-    # print(procs_list_2)
-
-    # procs_list_2 = [proc.info for proc in psutil.process_iter(attrs=['pid', 'name', 'username', 'status', 'started'])]
-    # print(procs_list_2)
-
-    print(f"type {psutil.process_iter()} | len: {psutil.process_iter()}")
-    test_list = list(psutil.process_iter())
-    print(test_list)
-    for process in psutil.process_iter():
-        print(f"type {process} | len: {process}")
-        print(process)
-        break
-
-def TEST_INFO_3():
-    # p = psutil.Process()
-    # with p.oneshot():
-    #     print(p.name())
-    #     p.name()  # execute internal routine once collecting multiple info
-    #     p.cpu_times()  # return cached value
-    #     print(p.cpu_percent())
-    #     p.cpu_percent()  # return cached value
-    #     print(datetime.datetime.fromtimestamp(p.create_time()).strftime("%Y-%m-%d %H:%M:%S"))
-    #     p.create_time()  # return cached value
-    #     p.ppid()  # return cached value
-    #     p.status()  # return cached value
-
-    pids = psutil.pids()
-    # print(pids)
-    for pid in pids:
-        p = psutil.Process(pid)
-        print(f'{pid} | {p.name()} | {datetime.datetime.fromtimestamp(p.create_time()).strftime("%Y-%m-%d %H:%M:%S")}')
 
 def main():
     print("Main Function")
@@ -249,10 +149,10 @@ def main():
     # GET_Mem_INFO()
     # GET_DISK_INFO()
     # Get_CPU_INFO()
-    GET_PC_UPTIME()
+    # GET_PC_UPTIME()
     # GET_Battery_INFO()
-    # GET_BOOT_TIME()
-    GET_BOOT_TIME2()
+    GET_BOOT_TIME()
+    # GET_BOOT_TIME2()
     # GET_BOOT_TIME3()
     # TEST_INFO()
     # TEST_INFO_2()
