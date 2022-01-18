@@ -1,4 +1,7 @@
 import psutil
+import datetime
+from uptime import uptime
+import wmi
 import ctypes
 import numpy as np
 #https://npd-58.tistory.com/27
@@ -13,6 +16,7 @@ def Get_CPU_INFO():
     cpu_logical_used_percent = np.array(psutil.cpu_percent(interval=0.5,percpu=True))
     print(f"CPU_Logical used percent: {cpu_logical_used_percent}")
     print(f"CPU_Logical used percent(AVG): {psutil.cpu_percent()}")
+    print(f"CPU freq: {psutil.cpu_freq().current/1024} Ghz")
 
     #return할 정보만 설정
 
@@ -107,7 +111,11 @@ def GET_PC_UPTIME():
 
     # since the time is in milliseconds i.e. 1000 * seconds
     # therefore truncating the value
+    print(t)
     t = int(str(t)[:-3])
+
+    # t = int(str(t))
+    print(t)
 
     # extracting hours, minutes, seconds & days from t
     # variable (which stores total time in seconds)
@@ -118,6 +126,47 @@ def GET_PC_UPTIME():
     # formatting the time in readable form
     # (format = x days, HH:MM:SS)
     print(f"{days} days, {hour:02}:{mins:02}:{sec:02}")
+
+def GET_Battery_INFO():
+    battery = psutil.sensors_battery()
+    print(f"battery info: {battery}")
+    print(f"percent: {battery.percent}%")
+    print(f"power_plugged: {battery.power_plugged}")
+
+def GET_BOOT_TIME():
+    psutil.boot_time()
+    print(psutil.boot_time())
+    boot_time_str = datetime.datetime.fromtimestamp(psutil.boot_time()).strftime("%Y-%m-%d %H:%M:%S")
+    print(f"boot time: {boot_time_str}")
+
+def GET_BOOT_TIME2():
+    wmiob = wmi.WMI()
+    sdata = wmiob.Win32_PerfFormattedData_PerfOS_System()
+    uptime = sdata[-1].SystemUpTime
+    tnow = datetime.datetime.now()
+    utime = datetime.timedelta(seconds=int(uptime))
+    boot = tnow - utime
+
+    print(f"boot:{boot} | tnow:{tnow} | utime:{utime}")
+    bootime = "Boot time was around {}day {}:{}:{}".format(boot.day, boot.hour, boot.minute, boot.second)
+    print(bootime)
+
+    # returns the time in seconds since the epoch
+    last_reboot = psutil.boot_time()
+
+    # converting the date and time in readable format
+    print(datetime.datetime.fromtimestamp(last_reboot))
+
+def GET_BOOT_TIME3():
+    print(f"boot_time(): {psutil.boot_time()}")
+
+
+
+
+def secs2hours(secs):
+    mm, ss = divmod(secs, 60)
+    hh, mm = divmod(mm, 60)
+    return "%d:%02d:%02d" % (hh, mm, ss)
 
 def TEST_INFO():
     # @ Todo Process 정보
@@ -167,21 +216,47 @@ def TEST_INFO_2():
     # print(procs_list_2)
 
     print(f"type {psutil.process_iter()} | len: {psutil.process_iter()}")
+    test_list = list(psutil.process_iter())
+    print(test_list)
     for process in psutil.process_iter():
         print(f"type {process} | len: {process}")
         print(process)
         break
 
+def TEST_INFO_3():
+    # p = psutil.Process()
+    # with p.oneshot():
+    #     print(p.name())
+    #     p.name()  # execute internal routine once collecting multiple info
+    #     p.cpu_times()  # return cached value
+    #     print(p.cpu_percent())
+    #     p.cpu_percent()  # return cached value
+    #     print(datetime.datetime.fromtimestamp(p.create_time()).strftime("%Y-%m-%d %H:%M:%S"))
+    #     p.create_time()  # return cached value
+    #     p.ppid()  # return cached value
+    #     p.status()  # return cached value
+
+    pids = psutil.pids()
+    # print(pids)
+    for pid in pids:
+        p = psutil.Process(pid)
+        print(f'{pid} | {p.name()} | {datetime.datetime.fromtimestamp(p.create_time()).strftime("%Y-%m-%d %H:%M:%S")}')
+
 def main():
     print("Main Function")
-    # GET_Process_INFO()
+    #GET_Process_INFO()
     # GET_Network_INFO()
     # GET_Mem_INFO()
     # GET_DISK_INFO()
     # Get_CPU_INFO()
-    # GET_PC_UPTIME()
+    GET_PC_UPTIME()
+    # GET_Battery_INFO()
+    # GET_BOOT_TIME()
+    GET_BOOT_TIME2()
+    # GET_BOOT_TIME3()
     # TEST_INFO()
-    TEST_INFO_2()
+    # TEST_INFO_2()
+    # TEST_INFO_3()
 
 if __name__ == "__main__":
     print("Start")
