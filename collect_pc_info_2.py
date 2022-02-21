@@ -4,6 +4,8 @@ from uptime import uptime
 import wmi
 import ctypes
 import numpy as np
+import socket
+import getmac
 #https://npd-58.tistory.com/27
 
 
@@ -64,30 +66,52 @@ def GET_DISK_INFO(flag=None):
 
     return result
 
+def GET_DISK_INFO2(flag=None):
+    result = {}
+    disk_partitions = psutil.disk_partitions(all=False)
+    result['disk_used'] = psutil.disk_usage(disk_partitions[0][1]).percent
+
+    return result
+
+
 def GET_Network_INFO(flag=None):
     # @ Todo Network 정보
-    result = {}
-
-    #netstate정보
-    # netstat_info = psutil.net_connections(kind='inet')
-    # print(f"type: {type(netstat_info)} | len: {len(netstat_info)}")
-    # for net_info in netstat_info[:3]:
-    #     print(f"{net_info}")
-
-    #net_if 정보
+    #net_if 정보(전체 수집)
     net_if_info = psutil.net_if_addrs()
-    # print(f"type: {type(net_if_info)} | len: {len(net_if_info)}")
     net_info_dict = {}
     for k, v in net_if_info.items():
+        print(f"key: {k} | value: {v}")
         tmp_dict={}
         tmp_dict['mac'] = v[0].address
         tmp_dict['ip'] = v[1].address
         tmp_dict['netmask'] = v[1].netmask
         net_info_dict[k] = tmp_dict
-    if flag == 'all':
-        print(net_info_dict)
 
-    result = net_info_dict
+    if 'Wi-Fi' in net_info_dict.keys():
+        result = net_info_dict['Wi-Fi']
+        print('Wi_Fi')
+    elif '이더넷 2' in net_info_dict.keys():
+        result = net_info_dict['이더넷 2']
+        print('이더넷 2')
+    elif '이더넷' in net_info_dict.keys():
+        result = net_info_dict['이더넷']
+        print('이더넷')
+    else:
+        result = {'mac': '::1', 'ip': '127.0.0.1', 'netmask': '255.255.255.0'} #loopback주소
+        print('loopback')
+
+    # print(result)
+    #result 형태(dict)예시: {'mac': '8C-55-4A-9C-2E-35', 'ip': '192.168.0.61', 'netmask': '255.255.255.0'}
+    return result
+
+def GET_Network_INFO_2(flag=None):
+    result = {}
+
+    result['host_name'] = socket.gethostname()
+    result['host_ip'] = socket.gethostbyname(socket.gethostname())
+    result['host_mac'] = getmac.get_mac_address()
+
+    print(f"nw_2: {result}")
     return result
 
 def GET_Process_INFO(flag=None):
@@ -98,8 +122,10 @@ def GET_Process_INFO(flag=None):
     procs_name_list = [proc.name() for proc in psutil.process_iter(attrs=['name'])]
     unique_proc_name = list(set(procs_name_list))
     unique_proc_name = [p_n for p_n in unique_proc_name if p_n !=''] #공백인 process는 제거
-    result['process_name'] = unique_proc_name
 
+    process_name_str = '|'.join(unique_proc_name)
+    result['process_name'] = process_name_str
+    # result['process_name'] = unique_proc_name
 
     if flag == 'all':
         print(f"procs name 중복제거({len(unique_proc_name)})")
@@ -144,6 +170,8 @@ def GET_PC_UPTIME(flag=None):
     # (format = x days, HH:MM:SS)
     print(f"{days} days, {hour:02}:{mins:02}:{sec:02}")
 
+
+
 def GET_Battery_INFO(flag=None):
     result = {}
     battery = psutil.sensors_battery()
@@ -175,23 +203,24 @@ def GET_BOOT_TIME(flag=None):
 
 def main():
     result_dict = {}
-    result_dict['cpu'] = Get_CPU_INFO()
-    result_dict['mem'] = GET_Mem_INFO()
-    result_dict['disk'] = GET_DISK_INFO()
-    result_dict['process'] = GET_Process_INFO()
-    result_dict['network'] = GET_Network_INFO()
-    result_dict['uptime'] = GET_BOOT_TIME()
-    result_dict['battery'] = GET_Battery_INFO()
 
-    # GET_PC_UPTIME()
+    result_dict['network'] = GET_Network_INFO()
+    # result_dict['uptime'] = GET_BOOT_TIME()
+    # result_dict['battery'] = GET_Battery_INFO()
+    # result_dict['disk_2'] = GET_DISK_INFO2()
+    # result_dict['network_2'] = GET_Network_INFO_2()
+
+    for k, v in result_dict.items():
+        print(f"{k} \t| {v}")
+
+    #GET_PC_UPTIME()
     # GET_BOOT_TIME2()
     # GET_BOOT_TIME3()
     # TEST_INFO()
     # TEST_INFO_2()
     # TEST_INFO_3()
 
-    for k, v in result_dict.items():
-        print(f"{k} \t| {v}")
+
 
 if __name__ == "__main__":
     main()
